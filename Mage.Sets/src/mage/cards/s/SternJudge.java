@@ -12,7 +12,9 @@ import mage.cards.CardImpl;
 import mage.cards.CardSetInfo;
 import mage.constants.CardType;
 import mage.constants.Outcome;
-import mage.filter.FilterPermanent;
+import mage.constants.TargetController;
+import mage.filter.common.FilterLandPermanent;
+import mage.abilities.dynamicvalue.common.PermanentsOnBattlefieldCount;
 import mage.game.Game;
 import mage.players.Player;
 
@@ -46,7 +48,7 @@ public final class SternJudge extends CardImpl {
 
 class SternJudgeEffect extends OneShotEffect {
 
-    private static final FilterPermanent filter = new FilterPermanent("Swamp");
+    private static final FilterLandPermanent filter = new FilterLandPermanent("Swamp");
 
     static {
         filter.add(SubType.SWAMP.getPredicate());
@@ -69,7 +71,7 @@ class SternJudgeEffect extends OneShotEffect {
     @Override
     public boolean apply(Game game, Ability source) {
         for (UUID playerId : game.getState().getPlayersInRange(source.getSourceId(), game)) {
-            Player player = game.getPlayer(source.getSourceId());
+            Player player = game.getPlayer(playerId);
             if (player != null) {
                 int lifeToLose = game.getBattlefield().getAllActivePermanents(filter, playerId, game).size();
                 player.loseLife(lifeToLose, game, source, false);

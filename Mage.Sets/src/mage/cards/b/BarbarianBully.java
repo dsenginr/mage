@@ -4,6 +4,7 @@ import mage.MageInt;
 import mage.abilities.Ability;
 import mage.abilities.common.LimitedTimesPerTurnActivatedAbility;
 import mage.abilities.costs.common.DiscardCardCost;
+import mage.abilities.effects.Effect;
 import mage.abilities.effects.OneShotEffect;
 import mage.abilities.effects.common.continuous.BoostSourceEffect;
 import mage.cards.CardImpl;
@@ -65,7 +66,7 @@ class BarbarianBullyEffect extends OneShotEffect {
         if (permanent == null) {
             return false;
         }
-        boolean costPaid = false;
+        boolean doEffect = true;
         for (UUID playerId : game.getState().getPlayerList(source.getControllerId())) {
             Player player = game.getPlayer(playerId);
             if (player == null) {
@@ -73,11 +74,16 @@ class BarbarianBullyEffect extends OneShotEffect {
             }
             if (player.chooseUse(Outcome.UnboostCreature, "Have " + permanent.getName() + " deal 4 damage to you?", source, game)) {
                 player.damage(4, permanent.getId(), source, game);
-                costPaid = true;
+                doEffect = false;
+                if (!game.isSimulation()) {
+                    game.informPlayers(player.getLogName() + " takes the damage to prevent the effect");
+                }
+                break;
             }
         }
-        if (!costPaid) {
-            return new BoostSourceEffect(2, 2, Duration.EndOfTurn).apply(game, source);
+        if (doEffect) {
+            Effect effect = new BoostSourceEffect(2, 2, Duration.EndOfTurn);
+            return effect.apply(game, source);
         }
         return true;
     }
